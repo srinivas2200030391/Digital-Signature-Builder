@@ -65,16 +65,16 @@ export default function HeroSection() {
 
   return (
     <div ref={heroRef} className="relative">
-      <HeroHighlight containerClassName="min-h-screen">
+      <HeroHighlight containerClassName="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20">
         {/* Spotlight Effect */}
         <Spotlight className="-top-40 left-0 md:left-60 md:-top-20" fill="white" />
         
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="floating-element absolute top-20 left-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
-          <div className="floating-element absolute top-40 right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
-          <div className="floating-element absolute bottom-20 left-1/3 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl" />
-          <div className="floating-element absolute top-1/2 right-1/4 w-72 h-72 bg-pink-500/10 rounded-full blur-3xl" />
+          <div className="floating-element absolute top-20 left-10 w-64 h-64 bg-blue-500/20 dark:bg-blue-400/10 rounded-full blur-3xl" />
+          <div className="floating-element absolute top-40 right-20 w-96 h-96 bg-indigo-500/20 dark:bg-indigo-400/10 rounded-full blur-3xl" />
+          <div className="floating-element absolute bottom-20 left-1/3 w-80 h-80 bg-purple-500/20 dark:bg-purple-400/10 rounded-full blur-3xl" />
+          <div className="floating-element absolute top-1/2 right-1/4 w-72 h-72 bg-pink-500/20 dark:bg-pink-400/10 rounded-full blur-3xl" />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
