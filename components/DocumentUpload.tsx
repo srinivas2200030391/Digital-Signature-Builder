@@ -2,6 +2,10 @@
 
 import { useState, useRef } from 'react';
 import { embedSignatureInPDF, SignatureMetadata } from '@/lib/pdfProcessor';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Upload, FileText, Download, Loader2 } from 'lucide-react';
 
 interface DocumentUploadProps {
   onDocumentUpload: (file: File | null) => void;
@@ -65,14 +69,14 @@ export default function DocumentUpload({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-        Document Upload
-      </h2>
-
-      <div className="space-y-4">
+    <Card className="shadow-xl backdrop-blur-sm bg-card/95">
+      <CardHeader>
+        <CardTitle className="text-2xl">Document Upload</CardTitle>
+        <CardDescription>Upload and sign your PDF documents</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
         {/* File Upload Area */}
-        <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 bg-gray-50 dark:bg-gray-900 text-center">
+        <div className="border-2 border-dashed border-border rounded-lg p-8 bg-muted text-center">
           <input
             ref={fileInputRef}
             type="file"
@@ -83,111 +87,113 @@ export default function DocumentUpload({
           
           {file ? (
             <div className="space-y-2">
-              <div className="text-4xl">📄</div>
-              <p className="text-gray-800 dark:text-gray-200 font-medium">
+              <FileText className="mx-auto h-12 w-12 text-primary" />
+              <p className="font-medium">
                 {file.name}
               </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 {(file.size / 1024).toFixed(2)} KB
               </p>
-              <button
+              <Button
+                variant="outline"
                 onClick={() => fileInputRef.current?.click()}
-                className="mt-2 px-4 py-2 text-sm bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                className="mt-2"
               >
                 Change File
-              </button>
+              </Button>
             </div>
           ) : (
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              📤 Choose PDF Document
-            </button>
+            <div className="space-y-4">
+              <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
+              <Button onClick={() => fileInputRef.current?.click()}>
+                📤 Choose PDF Document
+              </Button>
+            </div>
           )}
         </div>
 
         {/* Embed Signature Button */}
         {file && signatureData && (
-          <button
+          <Button
             onClick={handleEmbedSignature}
             disabled={isProcessing}
-            className={`w-full px-6 py-4 rounded-lg font-semibold text-white transition-colors ${
-              isProcessing
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-purple-600 hover:bg-purple-700'
-            }`}
+            className="w-full"
+            size="lg"
           >
             {isProcessing ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="animate-spin">⚙️</span>
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Processing...
-              </span>
+              </>
             ) : (
               '🔐 Embed Signature in PDF'
             )}
-          </button>
+          </Button>
         )}
 
         {/* Download Section */}
         {processedDocument && (
           <div className="space-y-4">
-            <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-              <p className="text-green-800 dark:text-green-200 font-medium mb-2">
+            <Alert className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+              <AlertTitle className="text-green-800 dark:text-green-200">
                 ✅ Document signed successfully!
-              </p>
-              <p className="text-sm text-green-700 dark:text-green-300">
+              </AlertTitle>
+              <AlertDescription className="text-green-700 dark:text-green-300">
                 Your signature and public key have been embedded in the PDF. Keep your private key secure.
-              </p>
-            </div>
+              </AlertDescription>
+            </Alert>
 
-            <button
+            <Button
               onClick={handleDownload}
-              className="w-full px-6 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+              className="w-full"
+              size="lg"
             >
-              ⬇️ Download Signed Document
-            </button>
+              <Download className="mr-2 h-4 w-4" />
+              Download Signed Document
+            </Button>
 
-            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-              <p className="text-sm text-blue-800 dark:text-blue-200">
-                <strong>What&apos;s embedded:</strong>
-              </p>
-              <ul className="text-sm text-blue-700 dark:text-blue-300 mt-2 space-y-1 list-disc list-inside">
-                <li>Your signature image</li>
-                <li>Unique signature hash/ID</li>
-                <li>Public cryptographic key</li>
-                <li>Timestamp and metadata</li>
-                <li>Stroke analysis data</li>
-              </ul>
-              <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
-                🔒 Note: Private key is NOT embedded for security. Keep it safe separately.
-              </p>
-            </div>
+            <Alert className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+              <AlertTitle className="text-blue-800 dark:text-blue-200">
+                What&apos;s embedded:
+              </AlertTitle>
+              <AlertDescription className="text-blue-700 dark:text-blue-300">
+                <ul className="mt-2 space-y-1 list-disc list-inside text-sm">
+                  <li>Your signature image</li>
+                  <li>Unique signature hash/ID</li>
+                  <li>Public cryptographic key</li>
+                  <li>Timestamp and metadata</li>
+                  <li>Stroke analysis data</li>
+                </ul>
+                <p className="text-xs mt-2">
+                  🔒 Note: Private key is NOT embedded for security. Keep it safe separately.
+                </p>
+              </AlertDescription>
+            </Alert>
           </div>
         )}
 
         {/* Status Messages */}
         {!signatureData && (
-          <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+          <Alert className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+            <AlertDescription className="text-yellow-800 dark:text-yellow-200">
               ⚠️ Please create a signature first before uploading a document
-            </p>
-          </div>
+            </AlertDescription>
+          </Alert>
         )}
-      </div>
 
-      <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">
-          Supported Features:
-        </h3>
-        <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-          <li>✓ PDF document signing</li>
-          <li>✓ Cryptographic key embedding</li>
-          <li>✓ Signature verification data</li>
-          <li>✓ Tamper-evident metadata</li>
-          <li>✓ Multiple signature modes (draw, type, upload)</li>
-        </ul>
-      </div>
-    </div>
+        <div className="p-4 bg-muted rounded-lg">
+          <h3 className="font-semibold mb-2 text-sm">
+            Supported Features:
+          </h3>
+          <ul className="text-sm text-muted-foreground space-y-1">
+            <li>✓ PDF document signing</li>
+            <li>✓ Cryptographic key embedding</li>
+            <li>✓ Signature verification data</li>
+            <li>✓ Tamper-evident metadata</li>
+            <li>✓ Multiple signature modes (draw, type, upload)</li>
+          </ul>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
