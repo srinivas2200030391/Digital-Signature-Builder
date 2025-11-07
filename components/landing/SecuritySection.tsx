@@ -50,33 +50,25 @@ export default function SecuritySection() {
         stagger: 0.2,
         ease: 'power3.out',
       });
-
-      // Animate icons on hover
-      cardsRef.current.forEach((card) => {
-        if (card) {
-          const icon = card.querySelector('.security-icon');
-          card.addEventListener('mouseenter', () => {
-            gsap.to(icon, {
-              rotation: 360,
-              scale: 1.2,
-              duration: 0.5,
-              ease: 'back.out(1.7)',
-            });
-          });
-          card.addEventListener('mouseleave', () => {
-            gsap.to(icon, {
-              rotation: 0,
-              scale: 1,
-              duration: 0.5,
-              ease: 'power2.out',
-            });
-          });
-        }
-      });
     }, sectionRef);
 
     return () => ctx.revert();
   }, []);
+
+  const handleCardHover = (index: number, isEntering: boolean) => {
+    const card = cardsRef.current[index];
+    if (card) {
+      const icon = card.querySelector('.security-icon');
+      if (icon) {
+        gsap.to(icon, {
+          rotation: isEntering ? 360 : 0,
+          scale: isEntering ? 1.2 : 1,
+          duration: 0.5,
+          ease: isEntering ? 'back.out(1.7)' : 'power2.out',
+        });
+      }
+    }
+  };
 
   return (
     <section id="security" ref={sectionRef} className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
@@ -111,6 +103,8 @@ export default function SecuritySection() {
                 ref={(el) => {
                   cardsRef.current[index] = el;
                 }}
+                onMouseEnter={() => handleCardHover(index, true)}
+                onMouseLeave={() => handleCardHover(index, false)}
                 whileHover={{ y: -5 }}
                 className="security-card p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg border-2 border-transparent hover:border-blue-500 transition-all duration-300"
               >
