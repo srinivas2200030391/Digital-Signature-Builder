@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface SignatureCanvasWithAuthProps {
-  onSignatureComplete: (signatureData: string, metadata: SignatureMetadata) => void;
+  onSignatureComplete: (signatureData: string, metadata: SignatureMetadata, personalDetails: any) => void;
 }
 
 export default function SignatureCanvasWithAuth({ onSignatureComplete }: SignatureCanvasWithAuthProps) {
@@ -199,7 +199,7 @@ export default function SignatureCanvasWithAuth({ onSignatureComplete }: Signatu
         throw new Error(data.error || 'Failed to save signature');
       }
 
-      onSignatureComplete(signatureData, metadata);
+      onSignatureComplete(signatureData, metadata, personalDetails);
       setShowPersonalDetails(false);
     } catch (err: any) {
       setError(err.message || 'Failed to save signature');

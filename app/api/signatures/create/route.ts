@@ -1,24 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 import dbConnect from '@/lib/mongodb';
 import Signature from '@/models/Signature';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-jwt-secret';
-
-// Helper function to verify JWT token
-function verifyToken(req: NextRequest) {
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return null;
-  }
-
-  const token = authHeader.substring(7);
-  try {
-    return jwt.verify(token, JWT_SECRET) as { userId: string; email: string; name: string };
-  } catch (error) {
-    return null;
-  }
-}
+import { verifyToken } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {

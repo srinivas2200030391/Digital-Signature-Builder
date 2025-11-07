@@ -14,6 +14,7 @@ import Link from 'next/link';
 export default function Home() {
   const [signatureData, setSignatureData] = useState<string | null>(null);
   const [signatureMetadata, setSignatureMetadata] = useState<SignatureMetadata | null>(null);
+  const [personalDetails, setPersonalDetails] = useState<any>(null);
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const { isAuthenticated, user, logout } = useAuth();
   const router = useRouter();
@@ -61,9 +62,10 @@ export default function Home() {
             {/* Left Column - Signature Creation */}
             <div className="space-y-6">
               <SignatureCanvasWithAuth
-                onSignatureComplete={(data, metadata) => {
+                onSignatureComplete={(data, metadata, personal) => {
                   setSignatureData(data);
                   setSignatureMetadata(metadata);
+                  setPersonalDetails(personal);
                 }}
               />
               
@@ -81,6 +83,7 @@ export default function Home() {
                 onDocumentUpload={setDocumentFile}
                 signatureData={signatureData}
                 signatureMetadata={signatureMetadata}
+                personalDetails={personalDetails}
               />
             </div>
           </div>

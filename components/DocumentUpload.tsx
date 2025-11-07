@@ -6,24 +6,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Upload, FileText, Download, Loader2 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface DocumentUploadProps {
   onDocumentUpload: (file: File | null) => void;
   signatureData: string | null;
   signatureMetadata: SignatureMetadata | null;
+  personalDetails: any;
 }
 
 export default function DocumentUpload({
   onDocumentUpload,
   signatureData,
   signatureMetadata,
+  personalDetails,
 }: DocumentUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedDocument, setProcessedDocument] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { token } = useAuth();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target.files?.[0];
@@ -42,34 +42,13 @@ export default function DocumentUpload({
 
     setIsProcessing(true);
     try {
-      // Fetch user signature details from database to get personal information
-      let userInfo: UserInfo | undefined;
-      
-      if (token && signatureMetadata.hash) {
-        try {
-          const response = await fetch('/api/signatures/check', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ signatureHash: signatureMetadata.hash }),
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            if (data.exists) {
-              // If signature exists in database, it should have user info
-              // For now, we'll use a simplified approach
-              userInfo = {
-                fullName: data.owner || 'Unknown',
-                email: data.email || '',
-              };
-            }
-          }
-        } catch (err) {
-          console.warn('Could not fetch user details from database:', err);
-        }
-      }
+      // Use personal details passed from signature creation
+      const userInfo: UserInfo | undefined = personalDetails ? {
+        fullName: personalDetails.fullName,
+        email: personalDetails.email,
+        organization: personalDetails.organization,
+        designation: personalDetails.designation,
+      } : undefined;
 
       const arrayBuffer = await file.arrayBuffer();
       const pdfBytes = await embedSignatureInPDF(
