@@ -5,6 +5,10 @@ import { useRef, useState, useEffect } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import { generateSignatureHash, generateKeyPair, StrokeData } from '@/lib/crypto';
 import { SignatureMetadata } from '@/lib/pdfProcessor';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface SignatureCanvasComponentProps {
   onSignatureComplete: (signatureData: string, metadata: SignatureMetadata) => void;
@@ -96,119 +100,91 @@ export default function SignatureCanvasComponent({ onSignatureComplete }: Signat
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-        Create Your Signature
-      </h2>
-
-      {/* Mode Selection */}
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={() => setMode('draw')}
-          className={`px-4 py-2 rounded-lg transition-colors ${
-            mode === 'draw'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
-          }`}
-        >
-          ✏️ Draw
-        </button>
-        <button
-          onClick={() => setMode('type')}
-          className={`px-4 py-2 rounded-lg transition-colors ${
-            mode === 'type'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
-          }`}
-        >
-          ⌨️ Type
-        </button>
-        <button
-          onClick={() => setMode('upload')}
-          className={`px-4 py-2 rounded-lg transition-colors ${
-            mode === 'upload'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
-          }`}
-        >
-          📤 Upload
-        </button>
-      </div>
-
-      {/* Signature Input Area */}
-      <div className="mb-4">
-        {mode === 'draw' && (
-          <div className="border-2 border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-white">
-            <SignatureCanvas
-              ref={sigCanvas}
-              canvasProps={{
-                className: 'w-full h-64',
-                style: { width: '100%', height: '256px' }
-              }}
-              onEnd={handleStrokeEnd}
-            />
-          </div>
-        )}
-
-        {mode === 'type' && (
-          <div className="border-2 border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-white">
-            <input
-              type="text"
-              value={typedName}
-              onChange={(e) => setTypedName(e.target.value)}
-              placeholder="Type your name here..."
-              className="w-full text-4xl font-cursive border-none outline-none bg-transparent text-gray-800"
-              style={{ fontFamily: 'cursive' }}
-            />
-          </div>
-        )}
-
-        {mode === 'upload' && (
-          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 bg-white text-center">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-            />
-            {uploadedImage ? (
-              <img
-                src={uploadedImage}
-                alt="Uploaded signature"
-                className="max-h-64 mx-auto"
+    <Card className="shadow-xl backdrop-blur-sm bg-card/95">
+      <CardHeader>
+        <CardTitle className="text-2xl">Create Your Signature</CardTitle>
+        <CardDescription>Choose your preferred signature method</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Tabs value={mode} onValueChange={(value) => setMode(value as 'draw' | 'type' | 'upload')}>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="draw">✏️ Draw</TabsTrigger>
+            <TabsTrigger value="type">⌨️ Type</TabsTrigger>
+            <TabsTrigger value="upload">📤 Upload</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="draw" className="space-y-4">
+            <div className="border-2 border-border rounded-lg overflow-hidden bg-white">
+              <SignatureCanvas
+                ref={sigCanvas}
+                canvasProps={{
+                  className: 'w-full h-64',
+                  style: { width: '100%', height: '256px' }
+                }}
+                onEnd={handleStrokeEnd}
               />
-            ) : (
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Choose Image
-              </button>
-            )}
-          </div>
-        )}
-      </div>
+            </div>
+          </TabsContent>
 
-      {/* Action Buttons */}
-      <div className="flex gap-4">
-        <button
-          onClick={handleClear}
-          className="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-        >
-          Clear
-        </button>
-        <button
-          onClick={handleSave}
-          className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
-        >
-          Save Signature
-        </button>
-      </div>
+          <TabsContent value="type" className="space-y-4">
+            <div className="border-2 border-border rounded-lg p-4 bg-white">
+              <input
+                type="text"
+                value={typedName}
+                onChange={(e) => setTypedName(e.target.value)}
+                placeholder="Type your name here..."
+                className="w-full text-4xl font-cursive border-none outline-none bg-transparent text-gray-800"
+                style={{ fontFamily: 'cursive' }}
+              />
+            </div>
+          </TabsContent>
 
-      <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-        <p>💡 Your signature will be analyzed for unique characteristics and secured with cryptographic keys.</p>
-      </div>
-    </div>
+          <TabsContent value="upload" className="space-y-4">
+            <div className="border-2 border-dashed border-border rounded-lg p-8 bg-muted text-center">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+              {uploadedImage ? (
+                <img
+                  src={uploadedImage}
+                  alt="Uploaded signature"
+                  className="max-h-64 mx-auto"
+                />
+              ) : (
+                <Button onClick={() => fileInputRef.current?.click()}>
+                  Choose Image
+                </Button>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        <div className="flex gap-4">
+          <Button
+            onClick={handleClear}
+            variant="outline"
+            className="flex-1"
+          >
+            Clear
+          </Button>
+          <Button
+            onClick={handleSave}
+            className="flex-1"
+          >
+            Save Signature
+          </Button>
+        </div>
+
+        <Alert>
+          <AlertDescription>
+            💡 Your signature will be analyzed for unique characteristics and secured with cryptographic keys.
+          </AlertDescription>
+        </Alert>
+      </CardContent>
+    </Card>
   );
 }

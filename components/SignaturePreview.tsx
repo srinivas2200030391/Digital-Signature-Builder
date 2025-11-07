@@ -2,6 +2,11 @@
 'use client';
 
 import { SignatureMetadata } from '@/lib/pdfProcessor';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Copy } from 'lucide-react';
 
 interface SignaturePreviewProps {
   signatureData: string;
@@ -15,97 +20,103 @@ export default function SignaturePreview({ signatureData, metadata }: SignatureP
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-        Signature Preview
-      </h2>
+    <Card className="shadow-xl backdrop-blur-sm bg-card/95">
+      <CardHeader>
+        <CardTitle className="text-2xl">Signature Preview</CardTitle>
+        <CardDescription>Your cryptographically secured signature</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="border-2 border-border rounded-lg p-4 bg-muted">
+          <img
+            src={signatureData}
+            alt="Your signature"
+            className="max-h-40 mx-auto"
+          />
+        </div>
 
-      <div className="mb-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
-        <img
-          src={signatureData}
-          alt="Your signature"
-          className="max-h-40 mx-auto"
-        />
-      </div>
-
-      <div className="space-y-3">
-        <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded">
-          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Unique Hash (ID)</p>
-          <div className="flex items-center gap-2">
-            <code className="text-xs font-mono text-gray-800 dark:text-gray-200 break-all flex-1">
-              {metadata?.hash?.substring(0, 40)}...
-            </code>
-            <button
-              onClick={() => copyToClipboard(metadata?.hash)}
-              className="text-blue-600 hover:text-blue-700 text-xs"
-              title="Copy full hash"
-            >
-              📋
-            </button>
+        <div className="space-y-3">
+          <div className="bg-muted p-3 rounded-lg">
+            <p className="text-xs text-muted-foreground mb-1">Unique Hash (ID)</p>
+            <div className="flex items-center gap-2">
+              <code className="text-xs font-mono flex-1 break-all">
+                {metadata?.hash?.substring(0, 40)}...
+              </code>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => copyToClipboard(metadata?.hash)}
+                title="Copy full hash"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-        </div>
 
-        <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded">
-          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Public Key</p>
-          <div className="flex items-center gap-2">
-            <code className="text-xs font-mono text-gray-800 dark:text-gray-200 break-all flex-1">
-              {metadata?.publicKey?.substring(0, 40)}...
-            </code>
-            <button
-              onClick={() => copyToClipboard(metadata?.publicKey)}
-              className="text-blue-600 hover:text-blue-700 text-xs"
-              title="Copy public key"
-            >
-              📋
-            </button>
+          <div className="bg-muted p-3 rounded-lg">
+            <p className="text-xs text-muted-foreground mb-1">Public Key</p>
+            <div className="flex items-center gap-2">
+              <code className="text-xs font-mono flex-1 break-all">
+                {metadata?.publicKey?.substring(0, 40)}...
+              </code>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => copyToClipboard(metadata?.publicKey)}
+                title="Copy public key"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-        </div>
 
-        <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded">
-          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Private Key</p>
-          <div className="flex items-center gap-2">
-            <code className="text-xs font-mono text-gray-800 dark:text-gray-200 break-all flex-1">
-              {metadata?.privateKey?.substring(0, 40)}...
-            </code>
-            <button
-              onClick={() => copyToClipboard(metadata?.privateKey)}
-              className="text-blue-600 hover:text-blue-700 text-xs"
-              title="Copy private key"
-            >
-              📋
-            </button>
+          <div className="bg-muted p-3 rounded-lg">
+            <p className="text-xs text-muted-foreground mb-1">Private Key</p>
+            <div className="flex items-center gap-2">
+              <code className="text-xs font-mono flex-1 break-all">
+                {metadata?.privateKey?.substring(0, 40)}...
+              </code>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => copyToClipboard(metadata?.privateKey)}
+                title="Copy private key"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-        </div>
 
-        <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded">
-          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Timestamp</p>
-          <p className="text-sm text-gray-800 dark:text-gray-200">
-            {new Date(metadata?.timestamp).toLocaleString()}
-          </p>
-        </div>
-
-        <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded">
-          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Signature Mode</p>
-          <p className="text-sm text-gray-800 dark:text-gray-200 capitalize">
-            {metadata?.mode}
-          </p>
-        </div>
-
-        {metadata?.strokes && metadata.strokes.length > 0 && (
-          <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded">
-            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Stroke Data Points</p>
-            <p className="text-sm text-gray-800 dark:text-gray-200">
-              {metadata.mode === 'draw' ? `${metadata.strokes.length} strokes recorded` : 'Processed'}
+          <div className="bg-muted p-3 rounded-lg">
+            <p className="text-xs text-muted-foreground mb-1">Timestamp</p>
+            <p className="text-sm">
+              {new Date(metadata?.timestamp).toLocaleString()}
             </p>
           </div>
-        )}
-      </div>
 
-      <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-        <p className="text-sm text-green-800 dark:text-green-200">
-          ✅ Signature created successfully with cryptographic security
-        </p>
-      </div>
-    </div>
+          <div className="bg-muted p-3 rounded-lg">
+            <p className="text-xs text-muted-foreground mb-1">Signature Mode</p>
+            <Badge variant="secondary" className="capitalize">
+              {metadata?.mode}
+            </Badge>
+          </div>
+
+          {metadata?.strokes && metadata.strokes.length > 0 && (
+            <div className="bg-muted p-3 rounded-lg">
+              <p className="text-xs text-muted-foreground mb-1">Stroke Data Points</p>
+              <p className="text-sm">
+                {metadata.mode === 'draw' ? `${metadata.strokes.length} strokes recorded` : 'Processed'}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <Alert className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+          <AlertTitle className="text-green-800 dark:text-green-200">Success</AlertTitle>
+          <AlertDescription className="text-green-700 dark:text-green-300">
+            ✅ Signature created successfully with cryptographic security
+          </AlertDescription>
+        </Alert>
+      </CardContent>
+    </Card>
   );
 }
