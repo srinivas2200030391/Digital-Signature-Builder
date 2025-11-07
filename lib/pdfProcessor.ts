@@ -10,13 +10,21 @@ export interface SignatureMetadata {
   mode: string;
 }
 
+export interface UserInfo {
+  fullName: string;
+  email: string;
+  organization?: string;
+  designation?: string;
+}
+
 /**
- * Embed signature and metadata into a PDF document
+ * Embed signature and metadata into a PDF document with user information
  */
 export async function embedSignatureInPDF(
   pdfBuffer: ArrayBuffer,
   signatureData: string,
-  metadata: SignatureMetadata
+  metadata: SignatureMetadata,
+  userInfo?: UserInfo
 ): Promise<Uint8Array> {
   // Load the existing PDF
   const pdfDoc = await PDFDocument.load(pdfBuffer);
@@ -57,30 +65,55 @@ export async function embedSignatureInPDF(
     height: signatureHeight,
   });
 
-  // Add text annotation with timestamp
+  // Add text annotation with timestamp and user info
   const fontSize = 8;
+  let textY = y - 15;
+  
   firstPage.drawText(`Digitally signed on: ${new Date(metadata.timestamp).toLocaleString()}`, {
     x,
-    y: y - 15,
+    y: textY,
     size: fontSize,
     color: rgb(0, 0, 0.5),
   });
+  
+  if (userInfo?.fullName) {
+    textY -= 12;
+    firstPage.drawText(`Signed by: ${userInfo.fullName}`, {
+      x,
+      y: textY,
+      size: fontSize,
+      color: rgb(0, 0, 0.5),
+    });
+  }
+  
+  if (userInfo?.organization) {
+    textY -= 12;
+    firstPage.drawText(`Organization: ${userInfo.organization}`, {
+      x,
+      y: textY,
+      size: fontSize,
+      color: rgb(0, 0, 0.5),
+    });
+  }
 
   // Embed metadata in PDF custom properties
   pdfDoc.setTitle('Digitally Signed Document');
   pdfDoc.setSubject('Document signed with Digital Signature Builder');
-  pdfDoc.setCreator('Digital Signature Builder');
+  pdfDoc.setCreator(userInfo?.fullName || 'Digital Signature Builder');
   pdfDoc.setProducer('Digital Signature Builder');
-  pdfDoc.setKeywords([
+  
+  const keywords = [
     'digital-signature',
     `hash:${metadata.hash}`,
     `timestamp:${metadata.timestamp}`,
     `mode:${metadata.mode}`,
-  ]);
-
-  // Add metadata as a custom field in the PDF
-  // Note: pdf-lib doesn't directly support custom metadata fields in the same way,
-  // but we can add it as a comment or annotation
+  ];
+  
+  if (userInfo?.email) {
+    keywords.push(`signer:${userInfo.email}`);
+  }
+  
+  pdfDoc.setKeywords(keywords);
 
   // Create a metadata page at the end
   const metadataPage = pdfDoc.addPage();
@@ -120,6 +153,36 @@ export async function embedSignatureInPDF(
     yPosition -= 5; // Extra spacing between fields
   };
 
+  // Add user information section
+  if (userInfo) {
+    metadataPage.drawText('Signer Information:', {
+      x: 50,
+      y: yPosition,
+      size: 12,
+      color: rgb(0, 0, 0.5),
+    });
+    yPosition -= lineHeight * 1.5;
+    
+    addMetadataLine('Full Name', userInfo.fullName);
+    addMetadataLine('Email', userInfo.email);
+    if (userInfo.organization) {
+      addMetadataLine('Organization', userInfo.organization);
+    }
+    if (userInfo.designation) {
+      addMetadataLine('Designation', userInfo.designation);
+    }
+    yPosition -= 10;
+  }
+
+  // Add signature details
+  metadataPage.drawText('Signature Details:', {
+    x: 50,
+    y: yPosition,
+    size: 12,
+    color: rgb(0, 0, 0.5),
+  });
+  yPosition -= lineHeight * 1.5;
+
   addMetadataLine('Signature Hash (Unique ID)', metadata.hash);
   addMetadataLine('Public Key', metadata.publicKey);
   // Note: Private key is NOT embedded for security reasons
@@ -143,6 +206,7 @@ export async function embedSignatureInPDF(
     '• This document has been digitally signed with cryptographic keys',
     '• The signature hash provides a unique identifier for verification',
     '• Any modifications to this document can be detected',
+    '• The signature is registered and unique to the signer',
     '• Keep the private key secure for signature validation',
   ];
 

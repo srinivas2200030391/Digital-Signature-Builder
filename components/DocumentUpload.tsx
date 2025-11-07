@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { embedSignatureInPDF, SignatureMetadata } from '@/lib/pdfProcessor';
+import { embedSignatureInPDF, SignatureMetadata, UserInfo } from '@/lib/pdfProcessor';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -11,12 +11,14 @@ interface DocumentUploadProps {
   onDocumentUpload: (file: File | null) => void;
   signatureData: string | null;
   signatureMetadata: SignatureMetadata | null;
+  personalDetails: any;
 }
 
 export default function DocumentUpload({
   onDocumentUpload,
   signatureData,
   signatureMetadata,
+  personalDetails,
 }: DocumentUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -40,11 +42,20 @@ export default function DocumentUpload({
 
     setIsProcessing(true);
     try {
+      // Use personal details passed from signature creation
+      const userInfo: UserInfo | undefined = personalDetails ? {
+        fullName: personalDetails.fullName,
+        email: personalDetails.email,
+        organization: personalDetails.organization,
+        designation: personalDetails.designation,
+      } : undefined;
+
       const arrayBuffer = await file.arrayBuffer();
       const pdfBytes = await embedSignatureInPDF(
         arrayBuffer,
         signatureData,
-        signatureMetadata
+        signatureMetadata,
+        userInfo
       );
 
       // Create blob and download URL
@@ -139,7 +150,7 @@ export default function DocumentUpload({
                 ✅ Document signed successfully!
               </AlertTitle>
               <AlertDescription className="text-green-700 dark:text-green-300">
-                Your signature and public key have been embedded in the PDF. Keep your private key secure.
+                Your signature, personal details, and cryptographic keys have been embedded in the PDF. Keep your private key secure.
               </AlertDescription>
             </Alert>
 
@@ -159,6 +170,7 @@ export default function DocumentUpload({
               <AlertDescription className="text-blue-700 dark:text-blue-300">
                 <ul className="mt-2 space-y-1 list-disc list-inside text-sm">
                   <li>Your signature image</li>
+                  <li>Signer personal information</li>
                   <li>Unique signature hash/ID</li>
                   <li>Public cryptographic key</li>
                   <li>Timestamp and metadata</li>
@@ -187,8 +199,9 @@ export default function DocumentUpload({
           </h3>
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>✓ PDF document signing</li>
+            <li>✓ Signer information embedding</li>
             <li>✓ Cryptographic key embedding</li>
-            <li>✓ Signature verification data</li>
+            <li>✓ Signature uniqueness verification</li>
             <li>✓ Tamper-evident metadata</li>
             <li>✓ Multiple signature modes (draw, type, upload)</li>
           </ul>
