@@ -56,6 +56,32 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      animation: {
+        spotlight: "spotlight 2s ease .75s 1 forwards",
+      },
+      keyframes: {
+        spotlight: {
+          "0%": {
+            opacity: "0",
+            transform: "translate(-72%, -62%) scale(0.5)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translate(-50%,-40%) scale(1)",
+          },
+        },
+      },
+      backgroundImage: {
+        "dot-thick-neutral-300":
+          "radial-gradient(circle, #d4d4d8 1px, transparent 1px)",
+        "dot-thick-neutral-800":
+          "radial-gradient(circle, #27272a 1px, transparent 1px)",
+        "dot-thick-indigo-500":
+          "radial-gradient(circle, #6366f1 1px, transparent 1px)",
+      },
+      backgroundSize: {
+        "dot-size": "20px 20px",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
