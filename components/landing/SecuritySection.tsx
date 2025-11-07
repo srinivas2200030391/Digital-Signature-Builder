@@ -36,13 +36,16 @@ export default function SecuritySection() {
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
+    // Set initial state to ensure visibility
+    gsap.set('.security-card', { scale: 1, opacity: 1 });
+    
     const ctx = gsap.context(() => {
       gsap.from('.security-card', {
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: 'top center',
+          start: 'top 80%',
           end: 'bottom center',
-          toggleActions: 'play none none reverse',
+          toggleActions: 'play none none none',
         },
         scale: 0.9,
         opacity: 0,

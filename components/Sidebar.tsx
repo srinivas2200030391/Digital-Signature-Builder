@@ -26,6 +26,7 @@ interface SidebarProps {
 export default function Sidebar({ className }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [activeHash, setActiveHash] = useState('');
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -43,35 +44,48 @@ export default function Sidebar({ className }: SidebarProps) {
     }
   }, []);
 
+  useEffect(() => {
+    // Track hash changes
+    const handleHashChange = () => {
+      setActiveHash(window.location.hash);
+    };
+
+    // Set initial hash
+    handleHashChange();
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
   const menuItems = [
     {
       name: "Dashboard",
-      href: "/",
+      href: "#",
       icon: Home,
     },
     {
       name: "Create Signature",
-      href: "/#signature",
+      href: "#signature",
       icon: FileSignature,
     },
     {
       name: "My Documents",
-      href: "/#documents",
+      href: "#documents",
       icon: FileText,
     },
     {
       name: "Verify Signature",
-      href: "/#verify",
+      href: "#verify",
       icon: CheckCircle,
     },
     {
       name: "Profile",
-      href: "/#profile",
+      href: "#profile",
       icon: User,
     },
     {
       name: "Settings",
-      href: "/#settings",
+      href: "#settings",
       icon: Settings,
     },
   ];
@@ -152,7 +166,7 @@ export default function Sidebar({ className }: SidebarProps) {
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {menuItems.map((item, index) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href;
+          const isActive = activeHash === item.href || (item.href === '#' && activeHash === '');
 
           return (
             <a
@@ -237,7 +251,7 @@ export default function Sidebar({ className }: SidebarProps) {
       {/* Desktop Sidebar */}
       <motion.aside
         ref={sidebarRef}
-        initial={false}
+        initial={{ width: isOpen ? 280 : 80 }}
         animate={{ width: isOpen ? 280 : 80 }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
         className={cn(
