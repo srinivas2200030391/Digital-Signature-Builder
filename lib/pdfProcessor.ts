@@ -17,6 +17,11 @@ export interface UserInfo {
   designation?: string;
 }
 
+export interface SignaturePosition {
+  x: number;
+  y: number;
+}
+
 /**
  * Embed signature and metadata into a PDF document with user information
  */
@@ -24,7 +29,8 @@ export async function embedSignatureInPDF(
   pdfBuffer: ArrayBuffer,
   signatureData: string,
   metadata: SignatureMetadata,
-  userInfo?: UserInfo
+  userInfo?: UserInfo,
+  position?: SignaturePosition
 ): Promise<Uint8Array> {
   // Load the existing PDF
   const pdfDoc = await PDFDocument.load(pdfBuffer);
@@ -54,8 +60,9 @@ export async function embedSignatureInPDF(
   // Calculate signature dimensions and position
   const signatureWidth = 200;
   const signatureHeight = 100;
-  const x = width - signatureWidth - 50; // 50px margin from right
-  const y = 50; // 50px from bottom
+  // Use provided position or default to bottom-right corner
+  const x = position?.x ?? (width - signatureWidth - 50); // Default: 50px margin from right
+  const y = position?.y ?? 50; // Default: 50px from bottom
 
   // Draw signature on the page
   firstPage.drawImage(signatureImage, {

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, FileText, Download, Loader2, X, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { embedSignatureInPDF, SignatureMetadata, UserInfo } from '@/lib/pdfProcessor';
+import { embedSignatureInPDF, SignatureMetadata, UserInfo, SignaturePosition } from '@/lib/pdfProcessor';
 
 interface MyDocumentsProps {
   signatureData: string | null;
@@ -32,7 +32,8 @@ export default function MyDocuments({
   const [selectedDoc, setSelectedDoc] = useState<DocumentItem | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [signaturePosition, setSignaturePosition] = useState({ x: 50, y: 50 });
+  const [signaturePosition, setSignaturePosition] = useState<SignaturePosition>({ x: 400, y: 50 });
+  const [useCustomPosition, setUseCustomPosition] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -96,7 +97,8 @@ export default function MyDocuments({
         arrayBuffer,
         signatureData,
         signatureMetadata,
-        userInfo
+        userInfo,
+        useCustomPosition ? signaturePosition : undefined
       );
 
       // Create blob and download URL
@@ -278,6 +280,54 @@ export default function MyDocuments({
                           ✍️ Your signature will be embedded on the first page with your details and cryptographic metadata.
                         </AlertDescription>
                       </Alert>
+                      
+                      {/* Signature Position Controls */}
+                      <div className="border rounded-lg p-4 bg-muted/50 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-sm font-medium">Custom Position</label>
+                          <input
+                            type="checkbox"
+                            checked={useCustomPosition}
+                            onChange={(e) => setUseCustomPosition(e.target.checked)}
+                            className="w-4 h-4 rounded border-gray-300"
+                          />
+                        </div>
+                        
+                        {useCustomPosition && (
+                          <div className="space-y-3 pt-2">
+                            <div>
+                              <label className="text-xs text-muted-foreground block mb-1">
+                                X Position (pixels from left): {signaturePosition.x}
+                              </label>
+                              <input
+                                type="range"
+                                min="0"
+                                max="600"
+                                value={signaturePosition.x}
+                                onChange={(e) => setSignaturePosition(prev => ({ ...prev, x: parseInt(e.target.value) }))}
+                                className="w-full"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs text-muted-foreground block mb-1">
+                                Y Position (pixels from bottom): {signaturePosition.y}
+                              </label>
+                              <input
+                                type="range"
+                                min="0"
+                                max="800"
+                                value={signaturePosition.y}
+                                onChange={(e) => setSignaturePosition(prev => ({ ...prev, y: parseInt(e.target.value) }))}
+                                className="w-full"
+                              />
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              💡 Tip: Signature dimensions are 200x100 pixels
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      
                       <Button
                         onClick={handleEmbedSignature}
                         disabled={isProcessing}
