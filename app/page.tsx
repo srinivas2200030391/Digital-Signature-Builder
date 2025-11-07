@@ -107,22 +107,7 @@ export default function Home() {
                   transition={{ duration: 0.5, delay: 0.2 }}
                   className="dashboard-card"
                 >
-                  <SavedSignatures
-                    onSignatureSelect={(signature) => {
-                      setSignatureData(signature.signatureData);
-                      // Create metadata from the saved signature
-                      const metadata: SignatureMetadata = {
-                        timestamp: signature.metadata.timestamp,
-                        hash: '',
-                        strokes: [],
-                        publicKey: '',
-                        privateKey: '',
-                        mode: signature.metadata.mode as 'draw' | 'type' | 'upload',
-                      };
-                      setSignatureMetadata(metadata);
-                      setPersonalDetails(signature.personalDetails);
-                    }}
-                  />
+                  <SavedSignatures />
                 </motion.div>
               </div>
 

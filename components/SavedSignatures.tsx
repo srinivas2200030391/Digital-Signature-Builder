@@ -36,10 +36,10 @@ interface SavedSignature {
 }
 
 interface SavedSignaturesProps {
-  onSignatureSelect?: (signature: SavedSignature) => void;
+  // Component is now view-only, for display purposes
 }
 
-export default function SavedSignatures({ onSignatureSelect }: SavedSignaturesProps) {
+export default function SavedSignatures({}: SavedSignaturesProps) {
   const [signatures, setSignatures] = useState<SavedSignature[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -271,14 +271,6 @@ export default function SavedSignatures({ onSignatureSelect }: SavedSignaturesPr
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Close</AlertDialogCancel>
-              {onSignatureSelect && selectedSignature && (
-                <AlertDialogAction onClick={() => {
-                  onSignatureSelect(selectedSignature);
-                  setSelectedSignature(null);
-                }}>
-                  Use This Signature
-                </AlertDialogAction>
-              )}
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
