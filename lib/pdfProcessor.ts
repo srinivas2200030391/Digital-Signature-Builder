@@ -1,12 +1,21 @@
 import { PDFDocument, rgb } from 'pdf-lib';
 
+export interface SignatureMetadata {
+  timestamp: string;
+  hash: string;
+  strokes: any[];
+  publicKey: string;
+  privateKey: string;
+  mode: string;
+}
+
 /**
  * Embed signature and metadata into a PDF document
  */
 export async function embedSignatureInPDF(
   pdfBuffer: ArrayBuffer,
   signatureData: string,
-  metadata: any
+  metadata: SignatureMetadata
 ): Promise<Uint8Array> {
   // Load the existing PDF
   const pdfDoc = await PDFDocument.load(pdfBuffer);
@@ -17,8 +26,21 @@ export async function embedSignatureInPDF(
   const { width, height } = firstPage.getSize();
 
   // Convert base64 signature image to embedded image
-  const signatureImageBytes = await fetch(signatureData).then(res => res.arrayBuffer());
-  const signatureImage = await pdfDoc.embedPng(signatureImageBytes);
+  const signatureImageBytes = base64ToArrayBuffer(signatureData);
+  
+  // Detect image format and embed accordingly
+  let signatureImage;
+  try {
+    // Try PNG first
+    signatureImage = await pdfDoc.embedPng(signatureImageBytes);
+  } catch (e) {
+    // If PNG fails, try JPEG
+    try {
+      signatureImage = await pdfDoc.embedJpg(signatureImageBytes);
+    } catch (e2) {
+      throw new Error('Unsupported image format. Please use PNG or JPEG.');
+    }
+  }
 
   // Calculate signature dimensions and position
   const signatureWidth = 200;
@@ -147,6 +169,20 @@ function splitString(str: string, maxLength: number): string[] {
     chunks.push(str.substring(i, i + maxLength));
   }
   return chunks;
+}
+
+/**
+ * Convert base64 data URL to ArrayBuffer
+ */
+function base64ToArrayBuffer(dataUrl: string): Uint8Array {
+  // Extract base64 data from data URL
+  const base64Data = dataUrl.split(',')[1] || dataUrl;
+  const binaryString = atob(base64Data);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
 }
 
 /**

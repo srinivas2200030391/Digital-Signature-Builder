@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { embedSignatureInPDF } from '@/lib/pdfProcessor';
+import { embedSignatureInPDF, SignatureMetadata } from '@/lib/pdfProcessor';
 
 interface DocumentUploadProps {
   onDocumentUpload: (file: File | null) => void;
   signatureData: string | null;
-  signatureMetadata: any;
+  signatureMetadata: SignatureMetadata | null;
 }
 
 export default function DocumentUpload({

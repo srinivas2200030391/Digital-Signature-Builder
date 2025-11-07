@@ -4,10 +4,11 @@ import { useState } from 'react';
 import SignatureCanvas from '@/components/SignatureCanvas';
 import DocumentUpload from '@/components/DocumentUpload';
 import SignaturePreview from '@/components/SignaturePreview';
+import { SignatureMetadata } from '@/lib/pdfProcessor';
 
 export default function Home() {
   const [signatureData, setSignatureData] = useState<string | null>(null);
-  const [signatureMetadata, setSignatureMetadata] = useState<any>(null);
+  const [signatureMetadata, setSignatureMetadata] = useState<SignatureMetadata | null>(null);
   const [documentFile, setDocumentFile] = useState<File | null>(null);
 
   return (
@@ -32,7 +33,7 @@ export default function Home() {
               }}
             />
             
-            {signatureData && (
+            {signatureData && signatureMetadata && (
               <SignaturePreview
                 signatureData={signatureData}
                 metadata={signatureMetadata}

@@ -3,10 +3,11 @@
 
 import { useRef, useState, useEffect } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
-import { generateSignatureHash, generateKeyPair } from '@/lib/crypto';
+import { generateSignatureHash, generateKeyPair, StrokeData } from '@/lib/crypto';
+import { SignatureMetadata } from '@/lib/pdfProcessor';
 
 interface SignatureCanvasComponentProps {
-  onSignatureComplete: (signatureData: string, metadata: any) => void;
+  onSignatureComplete: (signatureData: string, metadata: SignatureMetadata) => void;
 }
 
 export default function SignatureCanvasComponent({ onSignatureComplete }: SignatureCanvasComponentProps) {
@@ -14,7 +15,7 @@ export default function SignatureCanvasComponent({ onSignatureComplete }: Signat
   const [mode, setMode] = useState<'draw' | 'type' | 'upload'>('draw');
   const [typedName, setTypedName] = useState('');
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [strokes, setStrokes] = useState<any[]>([]);
+  const [strokes, setStrokes] = useState<StrokeData[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleClear = () => {
@@ -28,7 +29,7 @@ export default function SignatureCanvasComponent({ onSignatureComplete }: Signat
 
   const handleSave = async () => {
     let signatureData = '';
-    let strokeData: any[] = [];
+    let strokeData: StrokeData[] = [];
 
     if (mode === 'draw' && sigCanvas.current) {
       signatureData = sigCanvas.current.toDataURL('image/png');
@@ -79,7 +80,7 @@ export default function SignatureCanvasComponent({ onSignatureComplete }: Signat
   const handleStrokeEnd = () => {
     if (sigCanvas.current) {
       const data = sigCanvas.current.toData();
-      setStrokes(data);
+      setStrokes(data as any); // Store raw signature data
     }
   };
 

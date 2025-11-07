@@ -1,9 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
+import { SignatureMetadata } from '@/lib/pdfProcessor';
+
 interface SignaturePreviewProps {
   signatureData: string;
-  metadata: any;
+  metadata: SignatureMetadata;
 }
 
 export default function SignaturePreview({ signatureData, metadata }: SignaturePreviewProps) {

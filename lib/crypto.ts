@@ -1,9 +1,16 @@
+export interface StrokeData {
+  type?: 'draw' | 'text' | 'image';
+  content?: string;
+  source?: string;
+  points?: any[];
+}
+
 /**
  * Generate a SHA-256 hash from signature data and strokes
  */
 export async function generateSignatureHash(
   signatureData: string,
-  strokes: any[]
+  strokes: StrokeData[]
 ): Promise<string> {
   // Combine signature data with stroke information for uniqueness
   const combinedData = signatureData + JSON.stringify(strokes) + Date.now();
