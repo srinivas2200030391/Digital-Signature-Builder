@@ -12,7 +12,6 @@ import { SignatureMetadata } from '@/lib/pdfProcessor';
 import { GridBackground } from '@/components/ui/grid-background';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { gsap } from 'gsap';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 type ViewType = 'dashboard' | 'signature' | 'documents' | 'profile' | 'settings' | 'verify';
@@ -53,17 +52,7 @@ export default function Home() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  useEffect(() => {
-    // Add entrance animations
-    gsap.from('.dashboard-card', {
-      y: 50,
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.2,
-      ease: 'power3.out',
-      delay: 0.3,
-    });
-  }, [activeView]);
+
 
   if (!isAuthenticated) {
     return null; // or a loading spinner
