@@ -32,7 +32,7 @@ export default function MyDocuments({
   const [selectedDoc, setSelectedDoc] = useState<DocumentItem | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [signaturePosition, setSignaturePosition] = useState<SignaturePosition>({ x: 400, y: 50 });
+  const [signaturePosition, setSignaturePosition] = useState<SignaturePosition>({ x: 350, y: 50 });
   const [useCustomPosition, setUseCustomPosition] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -302,7 +302,7 @@ export default function MyDocuments({
                               <input
                                 type="range"
                                 min="0"
-                                max="600"
+                                max="550"
                                 value={signaturePosition.x}
                                 onChange={(e) => setSignaturePosition(prev => ({ ...prev, x: parseInt(e.target.value) }))}
                                 className="w-full"
@@ -314,15 +314,15 @@ export default function MyDocuments({
                               </label>
                               <input
                                 type="range"
-                                min="0"
-                                max="800"
+                                min="50"
+                                max="700"
                                 value={signaturePosition.y}
                                 onChange={(e) => setSignaturePosition(prev => ({ ...prev, y: parseInt(e.target.value) }))}
                                 className="w-full"
                               />
                             </div>
                             <p className="text-xs text-muted-foreground">
-                              💡 Tip: Signature dimensions are 200x100 pixels
+                              💡 Tip: Signature dimensions are 200x100 pixels. Position is measured from bottom-left corner.
                             </p>
                           </div>
                         )}
