@@ -3,23 +3,29 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { motion } from 'framer-motion';
+import { Lock, Shield, Key, CheckCircle2 } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const securityFeatures = [
   {
+    icon: Lock,
     title: 'SHA-256 Hashing',
     description: 'Each signature is converted to a unique cryptographic hash that ensures integrity.',
   },
   {
+    icon: Key,
     title: 'RSA-2048 Encryption',
     description: 'Industry-standard encryption with public and private key pairs for verification.',
   },
   {
+    icon: Shield,
     title: 'Unique Signature Detection',
     description: 'Our database ensures no two users can use the same signature.',
   },
   {
+    icon: CheckCircle2,
     title: 'Tamper-Proof Documents',
     description: 'Any modification to signed documents is immediately detectable through hash verification.',
   },
@@ -27,6 +33,7 @@ const securityFeatures = [
 
 export default function SecuritySection() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -43,6 +50,29 @@ export default function SecuritySection() {
         stagger: 0.2,
         ease: 'power3.out',
       });
+
+      // Animate icons on hover
+      cardsRef.current.forEach((card) => {
+        if (card) {
+          const icon = card.querySelector('.security-icon');
+          card.addEventListener('mouseenter', () => {
+            gsap.to(icon, {
+              rotation: 360,
+              scale: 1.2,
+              duration: 0.5,
+              ease: 'back.out(1.7)',
+            });
+          });
+          card.addEventListener('mouseleave', () => {
+            gsap.to(icon, {
+              rotation: 0,
+              scale: 1,
+              duration: 0.5,
+              ease: 'power2.out',
+            });
+          });
+        }
+      });
     }, sectionRef);
 
     return () => ctx.revert();
@@ -52,35 +82,54 @@ export default function SecuritySection() {
     <section id="security" ref={sectionRef} className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+            className="text-4xl sm:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600"
+          >
             Bank-Level Security
-          </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto"
+          >
             Your signatures are protected with the same cryptography used by financial institutions
-          </p>
+          </motion.p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {securityFeatures.map((feature, index) => (
-            <div
-              key={index}
-              className="security-card p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg border-2 border-transparent hover:border-blue-500 transition-all duration-300"
-            >
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-xl font-bold">🔒</span>
+          {securityFeatures.map((feature, index) => {
+            const Icon = feature.icon;
+            return (
+              <motion.div
+                key={index}
+                ref={(el) => {
+                  cardsRef.current[index] = el;
+                }}
+                whileHover={{ y: -5 }}
+                className="security-card p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg border-2 border-transparent hover:border-blue-500 transition-all duration-300"
+              >
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0">
+                    <div className="security-icon w-12 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white">
+                      {feature.title}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
                   </div>
                 </div>
-                <div>
-                  <h3 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
-                </div>
-              </div>
-            </div>
-          ))}
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
