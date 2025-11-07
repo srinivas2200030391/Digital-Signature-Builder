@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { embedSignatureInPDF, SignatureMetadata } from '@/lib/pdfProcessor';
+import { embedSignatureInPDF, SignatureMetadata, UserInfo } from '@/lib/pdfProcessor';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Upload, FileText, Download, Loader2 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface DocumentUploadProps {
   onDocumentUpload: (file: File | null) => void;
@@ -22,6 +23,7 @@ export default function DocumentUpload({
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedDocument, setProcessedDocument] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { token } = useAuth();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target.files?.[0];
@@ -40,11 +42,41 @@ export default function DocumentUpload({
 
     setIsProcessing(true);
     try {
+      // Fetch user signature details from database to get personal information
+      let userInfo: UserInfo | undefined;
+      
+      if (token && signatureMetadata.hash) {
+        try {
+          const response = await fetch('/api/signatures/check', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ signatureHash: signatureMetadata.hash }),
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data.exists) {
+              // If signature exists in database, it should have user info
+              // For now, we'll use a simplified approach
+              userInfo = {
+                fullName: data.owner || 'Unknown',
+                email: data.email || '',
+              };
+            }
+          }
+        } catch (err) {
+          console.warn('Could not fetch user details from database:', err);
+        }
+      }
+
       const arrayBuffer = await file.arrayBuffer();
       const pdfBytes = await embedSignatureInPDF(
         arrayBuffer,
         signatureData,
-        signatureMetadata
+        signatureMetadata,
+        userInfo
       );
 
       // Create blob and download URL
@@ -139,7 +171,7 @@ export default function DocumentUpload({
                 ✅ Document signed successfully!
               </AlertTitle>
               <AlertDescription className="text-green-700 dark:text-green-300">
-                Your signature and public key have been embedded in the PDF. Keep your private key secure.
+                Your signature, personal details, and cryptographic keys have been embedded in the PDF. Keep your private key secure.
               </AlertDescription>
             </Alert>
 
@@ -159,6 +191,7 @@ export default function DocumentUpload({
               <AlertDescription className="text-blue-700 dark:text-blue-300">
                 <ul className="mt-2 space-y-1 list-disc list-inside text-sm">
                   <li>Your signature image</li>
+                  <li>Signer personal information</li>
                   <li>Unique signature hash/ID</li>
                   <li>Public cryptographic key</li>
                   <li>Timestamp and metadata</li>
@@ -187,8 +220,9 @@ export default function DocumentUpload({
           </h3>
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>✓ PDF document signing</li>
+            <li>✓ Signer information embedding</li>
             <li>✓ Cryptographic key embedding</li>
-            <li>✓ Signature verification data</li>
+            <li>✓ Signature uniqueness verification</li>
             <li>✓ Tamper-evident metadata</li>
             <li>✓ Multiple signature modes (draw, type, upload)</li>
           </ul>
