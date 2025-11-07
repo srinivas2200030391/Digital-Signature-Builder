@@ -44,7 +44,7 @@ export default function DocumentUpload({
       );
 
       // Create blob and download URL
-      const blob = new Blob([pdfBytes as unknown as BlobPart], { type: 'application/pdf' });
+      const blob = new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       setProcessedDocument(url);
     } catch (error) {
@@ -137,7 +137,7 @@ export default function DocumentUpload({
                 ✅ Document signed successfully!
               </p>
               <p className="text-sm text-green-700 dark:text-green-300">
-                Your signature and cryptographic keys have been embedded in the PDF.
+                Your signature and public key have been embedded in the PDF. Keep your private key secure.
               </p>
             </div>
 
@@ -155,10 +155,13 @@ export default function DocumentUpload({
               <ul className="text-sm text-blue-700 dark:text-blue-300 mt-2 space-y-1 list-disc list-inside">
                 <li>Your signature image</li>
                 <li>Unique signature hash/ID</li>
-                <li>Public and private cryptographic keys</li>
+                <li>Public cryptographic key</li>
                 <li>Timestamp and metadata</li>
                 <li>Stroke analysis data</li>
               </ul>
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+                🔒 Note: Private key is NOT embedded for security. Keep it safe separately.
+              </p>
             </div>
           </div>
         )}

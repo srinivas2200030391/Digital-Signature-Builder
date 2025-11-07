@@ -1,9 +1,10 @@
 import { PDFDocument, rgb } from 'pdf-lib';
+import { StrokeData } from './crypto';
 
 export interface SignatureMetadata {
   timestamp: string;
   hash: string;
-  strokes: any[];
+  strokes: StrokeData[];
   publicKey: string;
   privateKey: string;
   mode: string;
@@ -121,7 +122,7 @@ export async function embedSignatureInPDF(
 
   addMetadataLine('Signature Hash (Unique ID)', metadata.hash);
   addMetadataLine('Public Key', metadata.publicKey);
-  addMetadataLine('Private Key', metadata.privateKey);
+  // Note: Private key is NOT embedded for security reasons
   addMetadataLine('Timestamp', metadata.timestamp);
   addMetadataLine('Signature Mode', metadata.mode);
   addMetadataLine('Stroke Data Points', 
@@ -185,16 +186,24 @@ function base64ToArrayBuffer(dataUrl: string): Uint8Array {
   return bytes;
 }
 
+export interface ExtractedMetadata {
+  title?: string;
+  subject?: string;
+  creator?: string;
+  producer?: string;
+  [key: string]: string | undefined;
+}
+
 /**
  * Extract signature metadata from a signed PDF
  */
-export async function extractSignatureMetadata(pdfBuffer: ArrayBuffer): Promise<any> {
+export async function extractSignatureMetadata(pdfBuffer: ArrayBuffer): Promise<ExtractedMetadata | null> {
   try {
     const pdfDoc = await PDFDocument.load(pdfBuffer);
     
     // Extract metadata from keywords
     const keywords = pdfDoc.getKeywords();
-    const metadata: any = {};
+    const metadata: { [key: string]: string } = {};
 
     if (keywords) {
       const keywordArray = keywords.split(',');
