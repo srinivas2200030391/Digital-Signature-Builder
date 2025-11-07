@@ -73,6 +73,7 @@ export default function Home() {
               {/* Left Column - Signature Creation */}
               <div className="space-y-6">
                 <motion.div
+                  id="signature"
                   className="dashboard-card"
                   whileHover={{ scale: 1.01 }}
                   transition={{ type: "spring", stiffness: 300 }}
@@ -114,6 +115,7 @@ export default function Home() {
               {/* Right Column - Document Upload and Processing */}
               <div className="space-y-6">
                 <motion.div
+                  id="documents"
                   className="dashboard-card"
                   whileHover={{ scale: 1.01 }}
                   transition={{ type: "spring", stiffness: 300 }}
@@ -127,6 +129,11 @@ export default function Home() {
                 </motion.div>
               </div>
             </div>
+
+            {/* Hidden anchor points for sidebar navigation */}
+            <div id="verify" className="h-0"></div>
+            <div id="profile" className="h-0"></div>
+            <div id="settings" className="h-0"></div>
 
             <motion.footer
               initial={{ opacity: 0 }}
