@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import SignatureCanvasWithAuth from '@/components/SignatureCanvasWithAuth';
 import DocumentUpload from '@/components/DocumentUpload';
 import SignaturePreview from '@/components/SignaturePreview';
+import SavedSignatures from '@/components/SavedSignatures';
 import Sidebar from '@/components/Sidebar';
 import { SignatureMetadata } from '@/lib/pdfProcessor';
 import { GridBackground } from '@/components/ui/grid-background';
@@ -98,6 +99,31 @@ export default function Home() {
                     />
                   </motion.div>
                 )}
+
+                {/* Saved Signatures */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="dashboard-card"
+                >
+                  <SavedSignatures
+                    onSignatureSelect={(signature) => {
+                      setSignatureData(signature.signatureData);
+                      // Create metadata from the saved signature
+                      const metadata: SignatureMetadata = {
+                        timestamp: signature.metadata.timestamp,
+                        hash: '',
+                        strokes: [],
+                        publicKey: '',
+                        privateKey: '',
+                        mode: signature.metadata.mode as 'draw' | 'type' | 'upload',
+                      };
+                      setSignatureMetadata(metadata);
+                      setPersonalDetails(signature.personalDetails);
+                    }}
+                  />
+                </motion.div>
               </div>
 
               {/* Right Column - Document Upload and Processing */}
