@@ -15,11 +15,13 @@ import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
+type ViewType = 'dashboard' | 'signature' | 'documents' | 'profile' | 'settings' | 'verify';
+
 export default function Home() {
   const [signatureData, setSignatureData] = useState<string | null>(null);
   const [signatureMetadata, setSignatureMetadata] = useState<SignatureMetadata | null>(null);
   const [personalDetails, setPersonalDetails] = useState<any>(null);
-  const [activeView, setActiveView] = useState<string>('dashboard');
+  const [activeView, setActiveView] = useState<ViewType>('dashboard');
   const { isAuthenticated, user } = useAuth();
   const router = useRouter();
 
@@ -33,8 +35,10 @@ export default function Home() {
   useEffect(() => {
     // Handle hash changes for navigation
     const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '');
-      if (hash) {
+      const hash = window.location.hash.replace('#', '') as ViewType;
+      const validViews: ViewType[] = ['dashboard', 'signature', 'documents', 'profile', 'settings', 'verify'];
+      
+      if (hash && validViews.includes(hash)) {
         setActiveView(hash);
       } else {
         setActiveView('dashboard');

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -33,7 +33,17 @@ export default function MyDocuments({
   const [isProcessing, setIsProcessing] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [signaturePosition, setSignaturePosition] = useState({ x: 50, y: 50 });
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Cleanup blob URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+    };
+  }, [pdfUrl]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -51,6 +61,11 @@ export default function MyDocuments({
   };
 
   const handleSelectDocument = async (doc: DocumentItem) => {
+    // Cleanup previous URL if exists
+    if (pdfUrl) {
+      URL.revokeObjectURL(pdfUrl);
+    }
+    
     setSelectedDoc(doc);
     
     // Create a preview URL for the PDF
@@ -60,11 +75,12 @@ export default function MyDocuments({
 
   const handleEmbedSignature = async () => {
     if (!selectedDoc || !signatureData || !signatureMetadata) {
-      alert('Please select a document and create a signature first');
+      setError('Please select a document and create a signature first');
       return;
     }
 
     setIsProcessing(true);
+    setError(null);
     try {
       const userInfo: UserInfo | undefined = personalDetails
         ? {
@@ -99,7 +115,7 @@ export default function MyDocuments({
       setSelectedDoc((prev) => (prev ? { ...prev, signed: true, signedUrl: url } : null));
     } catch (error) {
       console.error('Error embedding signature:', error);
-      alert('Error processing document. Please try again.');
+      setError('Error processing document. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -250,6 +266,11 @@ export default function MyDocuments({
               {/* Signature Actions */}
               {!selectedDoc.signed ? (
                 <>
+                  {error && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
                   {signatureData && signatureMetadata ? (
                     <div className="space-y-4">
                       <Alert>
