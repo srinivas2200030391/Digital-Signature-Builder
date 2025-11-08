@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { embedSignatureInPDF, SignatureMetadata, UserInfo } from '@/lib/pdfProcessor';
+import { useState, useRef, useEffect } from 'react';
+import { embedSignatureInPDF, SignatureMetadata, UserInfo, SignaturePosition } from '@/lib/pdfProcessor';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -23,14 +23,38 @@ export default function DocumentUpload({
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedDocument, setProcessedDocument] = useState<string | null>(null);
+  const [signaturePosition, setSignaturePosition] = useState<SignaturePosition>({ x: 350, y: 120 });
+  const [useCustomPosition, setUseCustomPosition] = useState(false);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Cleanup blob URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (pdfPreviewUrl) {
+        URL.revokeObjectURL(pdfPreviewUrl);
+      }
+      if (processedDocument) {
+        URL.revokeObjectURL(processedDocument);
+      }
+    };
+  }, [pdfPreviewUrl, processedDocument]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target.files?.[0];
     if (uploadedFile) {
+      // Cleanup previous URL if exists
+      if (pdfPreviewUrl) {
+        URL.revokeObjectURL(pdfPreviewUrl);
+      }
+      
       setFile(uploadedFile);
       onDocumentUpload(uploadedFile);
       setProcessedDocument(null);
+      
+      // Create preview URL for the PDF
+      const url = URL.createObjectURL(uploadedFile);
+      setPdfPreviewUrl(url);
     }
   };
 
@@ -55,7 +79,8 @@ export default function DocumentUpload({
         arrayBuffer,
         signatureData,
         signatureMetadata,
-        userInfo
+        userInfo,
+        useCustomPosition ? signaturePosition : undefined
       );
 
       // Create blob and download URL
@@ -123,23 +148,94 @@ export default function DocumentUpload({
           )}
         </div>
 
+        {/* PDF Preview */}
+        {file && pdfPreviewUrl && (
+          <div className="space-y-2">
+            <h3 className="font-semibold text-sm text-muted-foreground">Document Preview:</h3>
+            <div className="border-2 border-border rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden">
+              {/* Safe: pdfPreviewUrl is a blob URL created from user's file upload */}
+              <iframe
+                src={pdfPreviewUrl}
+                className="w-full h-96"
+                title="PDF Preview"
+                sandbox="allow-same-origin"
+              />
+            </div>
+          </div>
+        )}
+
         {/* Embed Signature Button */}
         {file && signatureData && (
-          <Button
-            onClick={handleEmbedSignature}
-            disabled={isProcessing}
-            className="w-full"
-            size="lg"
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              '🔐 Embed Signature in PDF'
-            )}
-          </Button>
+          <div className="space-y-4">
+            <Alert>
+              <AlertDescription>
+                ✍️ Your signature will be embedded on the first page with your details and cryptographic metadata.
+              </AlertDescription>
+            </Alert>
+            
+            {/* Signature Position Controls */}
+            <div className="border rounded-lg p-4 bg-muted/50 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Custom Signature Position</label>
+                <input
+                  type="checkbox"
+                  checked={useCustomPosition}
+                  onChange={(e) => setUseCustomPosition(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300 cursor-pointer"
+                />
+              </div>
+              
+              {useCustomPosition && (
+                <div className="space-y-3 pt-2">
+                  <div>
+                    <label className="text-xs text-muted-foreground block mb-1">
+                      X Position (pixels from left): {signaturePosition.x}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="550"
+                      value={signaturePosition.x}
+                      onChange={(e) => setSignaturePosition(prev => ({ ...prev, x: parseInt(e.target.value) }))}
+                      className="w-full cursor-pointer"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground block mb-1">
+                      Y Position (pixels from bottom): {signaturePosition.y}
+                    </label>
+                    <input
+                      type="range"
+                      min="120"
+                      max="700"
+                      value={signaturePosition.y}
+                      onChange={(e) => setSignaturePosition(prev => ({ ...prev, y: parseInt(e.target.value) }))}
+                      className="w-full cursor-pointer"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    💡 Tip: Signature dimensions are 200x100 pixels. Position is measured from bottom-left corner.
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            <Button
+              onClick={handleEmbedSignature}
+              disabled={isProcessing}
+              className="w-full"
+              size="lg"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                '🔐 Embed Signature in PDF'
+              )}
+            </Button>
+          </div>
         )}
 
         {/* Download Section */}
@@ -162,6 +258,19 @@ export default function DocumentUpload({
               <Download className="mr-2 h-4 w-4" />
               Download Signed Document
             </Button>
+            
+            {/* Preview of signed document */}
+            <div className="space-y-2">
+              <h3 className="font-semibold text-sm text-muted-foreground">Signed Document Preview:</h3>
+              <div className="border-2 border-border rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden">
+                <iframe
+                  src={processedDocument}
+                  className="w-full h-96"
+                  title="Signed PDF Preview"
+                  sandbox="allow-same-origin"
+                />
+              </div>
+            </div>
 
             <Alert className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
               <AlertTitle className="text-blue-800 dark:text-blue-200">
@@ -199,6 +308,8 @@ export default function DocumentUpload({
           </h3>
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>✓ PDF document signing</li>
+            <li>✓ PDF preview before signing</li>
+            <li>✓ Custom signature positioning</li>
             <li>✓ Signer information embedding</li>
             <li>✓ Cryptographic key embedding</li>
             <li>✓ Signature uniqueness verification</li>
