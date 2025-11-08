@@ -257,6 +257,7 @@ export default function MyDocuments({
                     src={pdfUrl}
                     className="w-full h-96"
                     title="PDF Preview"
+                    sandbox="allow-same-origin"
                   />
                 ) : (
                   <div className="h-96 flex items-center justify-center">

@@ -153,10 +153,12 @@ export default function DocumentUpload({
           <div className="space-y-2">
             <h3 className="font-semibold text-sm text-muted-foreground">Document Preview:</h3>
             <div className="border-2 border-border rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden">
+              {/* Safe: pdfPreviewUrl is a blob URL created from user's file upload */}
               <iframe
                 src={pdfPreviewUrl}
                 className="w-full h-96"
                 title="PDF Preview"
+                sandbox="allow-same-origin"
               />
             </div>
           </div>
@@ -265,6 +267,7 @@ export default function DocumentUpload({
                   src={processedDocument}
                   className="w-full h-96"
                   title="Signed PDF Preview"
+                  sandbox="allow-same-origin"
                 />
               </div>
             </div>
