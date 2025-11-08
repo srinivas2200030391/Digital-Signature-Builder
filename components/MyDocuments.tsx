@@ -32,7 +32,7 @@ export default function MyDocuments({
   const [selectedDoc, setSelectedDoc] = useState<DocumentItem | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [signaturePosition, setSignaturePosition] = useState<SignaturePosition>({ x: 350, y: 50 });
+  const [signaturePosition, setSignaturePosition] = useState<SignaturePosition>({ x: 350, y: 120 });
   const [useCustomPosition, setUseCustomPosition] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -314,7 +314,7 @@ export default function MyDocuments({
                               </label>
                               <input
                                 type="range"
-                                min="50"
+                                min="120"
                                 max="700"
                                 value={signaturePosition.y}
                                 onChange={(e) => setSignaturePosition(prev => ({ ...prev, y: parseInt(e.target.value) }))}

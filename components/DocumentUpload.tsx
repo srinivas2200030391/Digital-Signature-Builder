@@ -23,7 +23,7 @@ export default function DocumentUpload({
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedDocument, setProcessedDocument] = useState<string | null>(null);
-  const [signaturePosition, setSignaturePosition] = useState<SignaturePosition>({ x: 350, y: 50 });
+  const [signaturePosition, setSignaturePosition] = useState<SignaturePosition>({ x: 350, y: 120 });
   const [useCustomPosition, setUseCustomPosition] = useState(false);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -204,7 +204,7 @@ export default function DocumentUpload({
                     </label>
                     <input
                       type="range"
-                      min="50"
+                      min="120"
                       max="700"
                       value={signaturePosition.y}
                       onChange={(e) => setSignaturePosition(prev => ({ ...prev, y: parseInt(e.target.value) }))}

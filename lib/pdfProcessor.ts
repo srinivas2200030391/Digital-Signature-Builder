@@ -62,7 +62,7 @@ export async function embedSignatureInPDF(
   const signatureHeight = 100;
   // Use provided position or default to bottom-right corner
   const x = position?.x ?? (width - signatureWidth - 50); // Default: 50px margin from right
-  const y = position?.y ?? 50; // Default: 50px from bottom
+  const y = position?.y ?? 120; // Default: 120px from bottom to leave room for text
 
   // Draw signature on the page
   firstPage.drawImage(signatureImage, {
@@ -70,6 +70,7 @@ export async function embedSignatureInPDF(
     y,
     width: signatureWidth,
     height: signatureHeight,
+    opacity: 1.0, // Ensure full opacity for visibility
   });
 
   // Add text annotation with timestamp and user info
