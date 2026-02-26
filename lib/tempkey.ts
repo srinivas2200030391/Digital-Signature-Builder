@@ -20,6 +20,10 @@ const NONCE_MODE_PASSTHROUGH = 0x03;
 /**
  * TempKey register — volatile, in-memory only.
  * Cleared on every new nonce load to prevent stale state.
+ *
+ * Note: Node.js is single-threaded, so concurrent mutation is not
+ * possible within a single process. The atomic `nonceHash` function
+ * loads the nonce and hashes in a single call to avoid interleaving.
  */
 let tempKeyStore: Uint8Array | null = null;
 

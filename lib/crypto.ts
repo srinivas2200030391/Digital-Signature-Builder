@@ -184,8 +184,11 @@ export async function verifyTempKeyHash(
   hash: string,
   nonceHex: string
 ): Promise<boolean> {
+  if (!/^[0-9a-f]{64}$/i.test(nonceHex)) {
+    return false;
+  }
   const nonce = new Uint8Array(
-    nonceHex.match(/.{2}/g)!.map((byte) => parseInt(byte, 16))
+    (nonceHex.match(/.{2}/g) as RegExpMatchArray).map((byte) => parseInt(byte, 16))
   );
   const encoder = new TextEncoder();
   const dataBytes = encoder.encode(data);
