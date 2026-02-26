@@ -1,3 +1,5 @@
+import { nonceHash, generateChallenge } from './tempkey';
+
 export interface StrokeData {
   type?: 'draw' | 'text' | 'image';
   content?: string;
@@ -141,6 +143,58 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
     bytes[i] = binaryString.charCodeAt(i);
   }
   return bytes.buffer;
+}
+
+/**
+ * Generate a SHA-256 hash using TempKey (in-memory nonce).
+ * Loads a random nonce into the volatile TempKey register, then computes
+ * SHA-256 over (TempKey || data). This mirrors the ATSHA204A pattern where
+ * TempKey is primed via a nonce command before every hash operation.
+ *
+ * @param data - The data string to hash
+ * @returns Object with the hex digest and the nonce used (for verification)
+ */
+export async function generateTempKeyHash(
+  data: string
+): Promise<{ hash: string; nonce: string }> {
+  const nonce = generateChallenge();
+  const encoder = new TextEncoder();
+  const dataBytes = encoder.encode(data);
+
+  const hash = await nonceHash(nonce, dataBytes);
+
+  const nonceHex = Array.from(nonce)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+
+  return { hash, nonce: nonceHex };
+}
+
+/**
+ * Verify a TempKey-based hash by re-loading the same nonce
+ * into TempKey and recomputing the SHA-256.
+ *
+ * @param data     - The original data string
+ * @param hash     - The hash to verify against
+ * @param nonceHex - The hex-encoded nonce that was used during hashing
+ * @returns true if the hash matches
+ */
+export async function verifyTempKeyHash(
+  data: string,
+  hash: string,
+  nonceHex: string
+): Promise<boolean> {
+  if (!/^[0-9a-f]{64}$/i.test(nonceHex)) {
+    return false;
+  }
+  const nonce = new Uint8Array(
+    (nonceHex.match(/.{2}/g) as RegExpMatchArray).map((byte) => parseInt(byte, 16))
+  );
+  const encoder = new TextEncoder();
+  const dataBytes = encoder.encode(data);
+
+  const expectedHash = await nonceHash(nonce, dataBytes);
+  return expectedHash === hash;
 }
 
 /**
